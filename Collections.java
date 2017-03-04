@@ -3,7 +3,8 @@ import java.util.ArrayList;
 import java.lang.Math;
 /**
  *	Collections Utility (searching and Sorting) Class
- * 	Comparison Based Algorithms 
+ * 	+ Comparison Based Algorithms
+ *	+ Special data sorting algorithms [1 .. N]
  *	@author		Amr Mahmoud Ahmed Bekhiet Aly
  *	@version	0.1
 */
@@ -23,67 +24,21 @@ public class Collections {
 		collection.set(j, temp);				
 	}
 	/**
-	 *	provides Binary Search algorithm 
+	 *	provides Binary Search algorithm optional-(floor/ceil)
 	 *	Complexity O(log(size))~time
 	 *	Complexity O(1)~space
 	 *	Behaviour is undefined for unsorted elements
 	 *	@param collection 	elements to be searched
 	 *	@param item		 	element to lookup
+	 *	@param option	 	optinal return value (floor/ceil/exact)
 	 *	@return 		  	int index of item in collection if exist, -1 otherwise
 	*/
-	public static <T extends Comparable<? super T>> int binarySearch(List<T> collection, T item) {
-		int low = 0;
-		int high = collection.size() - 1;
-		while (low <= high) {
-			int mid = low + (high - low)/2;
-			if (collection.get(mid).compareTo(item) == 0) {
-				return mid;
-			}else if (collection.get(mid).compareTo(item) < 0) {
-				low = mid + 1;
-			}else {
-				high = mid - 1;
-			}
-		}
-		return -1;	
-	}
-	/**
-	 *	provides Binary Search floor algorithm 
-	 *	Complexity O(log(size))~time
-	 *	Complexity O(1)~space
-	 *	Behaviour is undefined for unsorted elements
-	 *	@param collection 	elements to be searched
-	 *	@param item		 	element to lookup its floor
-	 *	@return 		  	int index of floor to item in collection if exist, -1 otherwise
-	*/
-	public static <T extends Comparable<? super T>> int floor(List<T> collection, T item) {
+	public static <T extends Comparable<? super T>> int binarySearch(List<T> collection, T item, int option) {
+		if (collection == null || item == null)
+			return -1;
 		int low = 0;
 		int high = collection.size() - 1;
 		int floor = -1;
-		while (low <= high) {
-			int mid = low + (high - low)/2;
-			if (collection.get(mid).compareTo(item) == 0) {
-				return mid;
-			}else if (collection.get(mid).compareTo(item) < 0) {
-				floor = mid;
-				low = mid + 1;
-			}else {
-				high = mid - 1;
-			}
-		}
-		return floor;	
-	}
-	/**
-	 *	provides Binary Search ceil algorithm 
-	 *	Complexity O(log(size))~time
-	 *	Complexity O(1)~space
-	 *	Behaviour is undefined for unsorted elements
-	 *	@param collection 	elements to be searched
-	 *	@param item		 	element to lookup its ceil
-	 *	@return 		  	int index of ceil to item in collection if exist, -1 otherwise
-	*/
-	public static <T extends Comparable<? super T>> int ceil(List<T> collection, T item) {
-		int low = 0;
-		int high = collection.size() - 1;
 		int ceil = -1;
 		while (low <= high) {
 			int mid = low + (high - low)/2;
@@ -92,11 +47,10 @@ public class Collections {
 			}else if (collection.get(mid).compareTo(item) < 0) {
 				low = mid + 1;
 			}else {
-				ceil = mid;
 				high = mid - 1;
 			}
 		}
-		return ceil;	
+		return (option == 0)? -1 : (option < 0)? floor : ceil;	
 	}
 	/**
 	 *	provides Selection sort algorithm (Increasing Order)
@@ -106,6 +60,8 @@ public class Collections {
 	 *	@return 		  	void
 	*/
 	public static <T extends Comparable<? super T>> void selectionSort(List<T> collection) {
+		if (collection == null)
+			return;
 		int size = collection.size() - 1;
 		T max = null;
 		int maxIndex = -1;
@@ -129,6 +85,8 @@ public class Collections {
 	 *	@return 		  	void
 	*/
 	public static <T extends Comparable<? super T>> void bubbleSort(List<T> collection) {
+		if (collection == null)
+			return;
 		int size = collection.size() - 1;
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < (size - i); j++) {
@@ -200,6 +158,8 @@ public class Collections {
 	 *	@return 		  	void
 	*/
 	public static <T extends Comparable<? super T>> void mergeSort(List<T> collection) {
+		if (collection == null)
+			return;
 		List<T> aux = new ArrayList<>(collection);
 		merge(collection, 0, collection.size() - 1, aux);
 	}
@@ -257,6 +217,52 @@ public class Collections {
 	 *	@return 		  	void
 	*/
 	public static <T extends Comparable<? super T>> void quickSort(List<T> collection) {
+		if (collection == null)
+			return;
 		quick(collection, 0, collection.size() - 1);
 	}
+	/**
+	 *	Radix Helper method sot according to determined digit
+	 *	Complexity O(size) ~ time
+	 *	Complexity O(C) ~ Additional space
+	 *	@param collection 	elements to be sorted
+	 *	@param div 			used to determine digit to sort
+	 *	@return 		  	void
+	*/
+	public static  void radixHelper(List<Integer> collection, int div) {
+		int[] digits = new int[10];
+		List<Integer> temp = new ArrayList<>();
+		for (int i = 0; i < collection.size(); i++) {
+			int current = collection.get(i);
+			temp.add(current);
+			digits[(current/div)%10]++;
+		}
+		for (int i = 1; i < 10; i++) {
+			digits[i] += digits[i - 1];
+		}
+		for (int i = temp.size() - 1; i >= 0; i--) {
+			int num = temp.get(i);
+			collection.set(--digits[(num/div)%10], num);
+		}
+	}
+	/**
+	 *	provides Radix sort algorithm (Increasing Order)
+	 *	Complexity O(size) ~ time
+	 *	Complexity O(1) ~ Additional space
+	 *	@param collection 	elements to be sorted
+	 *	@return 		  	void
+	*/
+	public static  void radixSort(List<Integer> collection) {
+		if (collection == null)
+			return;
+		int digits = 0;
+		for (int i = 0; i < collection.size(); i++) {
+			digits = Math.max(digits, (int)Math.log10(collection.get(i)) + 1);
+		}
+		int div = 1;
+		while (digits-- > 0) {
+			radixHelper(collection, div);
+			div *= 10;
+		}
+	}	
 }
